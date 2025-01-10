@@ -65,7 +65,7 @@ fn main() {
             .q1(1.0)
             .max_iterations(100_000);
 
-        let improved_best = dichotomy_step_ralgo(best, false, 0.0, ralgo);
+        let improved_best = dichotomy_step_ralgo(&best, false, 0.0, ralgo);
         println!("heuristic + ralgo");
         improved_best.print();
     });

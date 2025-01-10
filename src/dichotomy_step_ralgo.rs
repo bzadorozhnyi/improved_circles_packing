@@ -6,7 +6,7 @@ use crate::{
 };
 
 pub fn dichotomy_step_ralgo(
-    circle_packing: CirclesPacking,
+    circle_packing: &CirclesPacking,
     reset_step: bool,
     eps: FloatType,
     ralgo_builder: RAlgorithmBuilder,
@@ -48,7 +48,7 @@ pub fn dichotomy_step_ralgo(
 }
 
 pub fn smart_dichotomy_step_ralgo(
-    circle_packing: CirclesPacking,
+    circle_packing: &CirclesPacking,
     eps: FloatType,
     ralgo_builder: RAlgorithmBuilder,
 ) -> CirclesPacking {
