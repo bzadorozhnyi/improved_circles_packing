@@ -1,4 +1,10 @@
 use nalgebra::DVector;
+use plotters::{
+    chart::ChartBuilder,
+    drawing::IntoDrawingArea,
+    prelude::{BitMapBackend, EmptyElement},
+    style::{full_palette::GREEN_800, Color, ShapeStyle, TextStyle, WHITE},
+};
 
 use crate::{circle::Circle, point::Point, utils::FloatType};
 
@@ -89,5 +95,64 @@ impl CirclesPacking {
             );
         }
         println!();
+    }
+
+    pub fn plot(&self, path: &str) {
+        let img_size = 1000;
+        let plot_size = self.main_circle.radius * 1.1;
+        let label_area_size = 85;
+
+        let root = BitMapBackend::new(path, (img_size, img_size)).into_drawing_area();
+        root.fill(&WHITE).ok();
+
+        let mut chart = ChartBuilder::on(&root)
+            .set_all_label_area_size(label_area_size)
+            .build_cartesian_2d(-plot_size..plot_size, -plot_size..plot_size)
+            .unwrap();
+
+        chart
+            .configure_mesh()
+            .disable_mesh()
+            .x_labels(10)
+            .y_labels(10)
+            .label_style(TextStyle::from(("bebas neue", 30)))
+            .draw()
+            .ok();
+
+        let root = chart.plotting_area();
+
+        let convert_radius = |radius: FloatType| {
+            return (radius * (img_size - 2 * label_area_size) as FloatType) / (2.0 * plot_size);
+        };
+
+        let set_circle = |c: &Circle| {
+            return EmptyElement::at((c.center.unwrap().x, c.center.unwrap().y))
+                + plotters::element::Circle::new(
+                    (0, 0),
+                    3,
+                    ShapeStyle {
+                        color: GREEN_800.mix(0.8),
+                        filled: true,
+                        stroke_width: 2,
+                    },
+                )
+                + plotters::element::Circle::new(
+                    (0, 0),
+                    convert_radius(c.radius),
+                    ShapeStyle {
+                        color: GREEN_800.mix(0.8),
+                        filled: false,
+                        stroke_width: 2,
+                    },
+                );
+        };
+
+        let main_circle = Circle::new(self.main_circle.radius, Point { x: 0.0, y: 0.0 });
+        root.draw(&set_circle(&main_circle)).ok();
+        self.inner_circles.iter().for_each(|c| {
+            root.draw(&set_circle(&c)).ok();
+        });
+
+        root.present().ok();
     }
 }
