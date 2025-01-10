@@ -4,7 +4,7 @@ use crate::utils::FloatType;
 
 use super::RAlgorithm;
 
-type CalcfgType = Box<dyn Fn(&DVector<FloatType>) -> (FloatType, DVector<FloatType>)>;
+type CalcfgType = dyn Fn(&DVector<FloatType>) -> (FloatType, DVector<FloatType>);
 
 pub struct RAlgorithmBuilder {
     alpha: FloatType,
@@ -12,7 +12,7 @@ pub struct RAlgorithmBuilder {
     epsx: FloatType,
     epsg: FloatType,
     max_iterations: usize,
-    calcfg: CalcfgType,
+    calcfg: Box<CalcfgType>,
 }
 
 impl Default for RAlgorithmBuilder {
@@ -60,7 +60,7 @@ impl RAlgorithmBuilder {
         self
     }
 
-    pub fn calcfg(mut self, calcfg: CalcfgType) -> Self {
+    pub fn calcfg(mut self, calcfg: Box<CalcfgType>) -> Self {
         self.calcfg = calcfg;
         self
     }
