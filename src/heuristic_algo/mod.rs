@@ -2,7 +2,6 @@ pub mod builder;
 
 use rand::rngs::StdRng;
 use rand::Rng;
-use std::cmp::min;
 
 use crate::circle::*;
 use crate::circles_packing::CirclesPacking;
@@ -307,7 +306,7 @@ impl HeuristicAlgorithm {
                         continue;
                     }
 
-                    for shift in 1..=min(2_usize, placed_circle_indexes.len()) {
+                    for shift in 1..=2.min(placed_circle_indexes.len()) {
                         let first_index = cycle_index(&placed_circle_indexes, placed_circle_index);
                         let second_index =
                             cycle_index(&placed_circle_indexes, placed_circle_index + shift);
