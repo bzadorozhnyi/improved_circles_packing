@@ -2,6 +2,10 @@ use nalgebra::DVector;
 
 use crate::{ralgo::RAlgorithm, utils::FloatType};
 
+fn last(x: &DVector<FloatType>) -> FloatType {
+    x[x.len() - 1]
+}
+
 pub fn dichotomy_step_ralgo(
     mut x: DVector<FloatType>,
     reset_step: bool,
@@ -9,8 +13,6 @@ pub fn dichotomy_step_ralgo(
     ralgo: RAlgorithm,
 ) -> DVector<FloatType> {
     let mut step_size = 40.96;
-
-    let last = |x: &DVector<FloatType>| -> FloatType { x[x.len() - 1] };
 
     while step_size >= 0.01 {
         println!("step = {step_size}");
@@ -35,8 +37,6 @@ pub fn smart_dichotomy_step_ralgo(
     ralgo: RAlgorithm,
 ) -> DVector<FloatType> {
     let mut step_size = 40.96;
-
-    let last = |x: &DVector<FloatType>| -> FloatType { x[x.len() - 1] };
 
     while step_size >= 0.01 {
         println!("step = {step_size}");
