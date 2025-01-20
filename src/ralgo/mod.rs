@@ -1,5 +1,7 @@
 pub mod builder;
 
+use std::sync::Arc;
+
 use nalgebra::{DMatrix, DVector};
 
 use crate::utils::FloatType;
@@ -12,7 +14,7 @@ pub struct RAlgorithm {
     epsx: FloatType,
     epsg: FloatType,
     max_iterations: usize,
-    calcfg: Box<dyn Fn(&DVector<FloatType>) -> (FloatType, DVector<FloatType>)>,
+    calcfg: Arc<dyn Fn(&DVector<FloatType>) -> (FloatType, DVector<FloatType>)>,
 }
 
 impl RAlgorithm {

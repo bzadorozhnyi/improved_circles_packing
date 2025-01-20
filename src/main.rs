@@ -1,13 +1,18 @@
+use std::sync::Arc;
+
 use circles_pack::{
-    dichotomy_step_ralgo::dichotomy_step_ralgo,
+    calcfg::calcfg,
+    circles_packing::CirclesPacking,
+    dichotomy_step_ralgo::{dichotomy_step_ralgo, smart_dichotomy_step_ralgo},
     heuristic_algo::HeuristicAlgorithmBuilder,
     ralgo::RAlgorithmBuilder,
     utils::{measure_time, FloatType},
 };
+use nalgebra::DVector;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 fn main() {
-    let total_iterations: usize = 100_000;
+    let total_iterations: usize = 1_000_000;
     let threads_number: usize = 10;
     rayon::ThreadPoolBuilder::new()
         .num_threads(threads_number)
@@ -19,7 +24,7 @@ fn main() {
         .map(|x| x as FloatType)
         .collect::<Vec<_>>();
 
-    let (total_time, _) = measure_time(|| {
+    let (total_time, best) = measure_time(|| {
         let par_iter = (1..=threads_number).into_par_iter().map(|x| {
             let thread_iterations = total_iterations / threads_number;
             let skip_iterations = (x - 1) * thread_iterations;
@@ -32,7 +37,7 @@ fn main() {
                         .iter()
                         .max_by(|a, b| a.partial_cmp(b).unwrap())
                         .unwrap()
-                        * 0.25,
+                        * 0.3,
                 )
                 .delta(1e-6)
                 .build();
@@ -42,9 +47,9 @@ fn main() {
 
         let answers: Vec<_> = par_iter.collect();
 
-        for answer in &answers {
-            println!("{} {}", answer.is_valid_pack(), answer.main_circle.radius)
-        }
+        // for answer in &answers {
+        //     println!("{}", answer.main_circle.radius);
+        // }
 
         let best = answers
             .into_iter()
@@ -57,18 +62,89 @@ fn main() {
             })
             .unwrap();
 
-        println!("heuristic");
-        best.print();
-
-        let ralgo = RAlgorithmBuilder::new()
-            .alpha(1.5)
-            .q1(1.0)
-            .max_iterations(100_000);
-
-        let improved_best = dichotomy_step_ralgo(&best, false, 0.0, ralgo);
-        println!("heuristic + ralgo");
-        improved_best.print();
+        best
     });
 
-    println!("{total_time}");
+    println!("iters = {total_iterations}");
+
+    println!("heuristic");
+    println!("time = {total_time}");
+    println!("R = {}", best.main_circle.radius);
+
+    println!();
+
+    let x: DVector<FloatType> = best.into_coords_vec();
+    let inner_circles_radiuses = best.inner_circles_radiuses();
+    let inner_circles_radiuses_clone = inner_circles_radiuses.clone();
+
+    let calcfg = move |x: &DVector<FloatType>| -> (FloatType, DVector<FloatType>) {
+        calcfg(&x, &inner_circles_radiuses_clone)
+    };
+
+    let ralgo_base = RAlgorithmBuilder::new()
+        .alpha(1.5)
+        .max_iterations(100_000)
+        .calcfg(Arc::new(calcfg));
+
+    let (total_time_ralgo_1, improved_1) = measure_time(|| {
+        let ralgo = ralgo_base.clone().q1(0.95).build();
+
+        let x = dichotomy_step_ralgo(x.clone(), false, 0.0, ralgo);
+        let improved_best_1 =
+            CirclesPacking::from_coords_vec_and_radiuses(x, &inner_circles_radiuses);
+
+        improved_best_1
+    });
+
+    let (total_time_ralgo_2, improved_2) = measure_time(|| {
+        let ralgo = ralgo_base.clone().q1(1.0).build();
+
+        let x = dichotomy_step_ralgo(x.clone(), false, 0.0, ralgo);
+        let improved_best_2 =
+            CirclesPacking::from_coords_vec_and_radiuses(x, &inner_circles_radiuses);
+
+        improved_best_2
+    });
+
+    println!("heuristic + ralgo(q1=0.95)");
+    println!("time = {total_time_ralgo_1}");
+    println!("R = {}", improved_1.main_circle.radius);
+
+    println!();
+
+    println!("heuristic + ralgo(q1=1.0)");
+    println!("time = {total_time_ralgo_2}");
+    println!("R = {}", improved_2.main_circle.radius);
+
+    println!();
+
+    let (total_time_ralgo_1, improved_1) = measure_time(|| {
+        let ralgo = ralgo_base.clone().q1(0.95).build();
+
+        let x = smart_dichotomy_step_ralgo(x.clone(), 0.0, ralgo);
+        let improved_best_1 =
+            CirclesPacking::from_coords_vec_and_radiuses(x, &inner_circles_radiuses);
+
+        improved_best_1
+    });
+
+    let (total_time_ralgo_2, improved_2) = measure_time(|| {
+        let ralgo = ralgo_base.clone().q1(1.0).build();
+
+        let x = smart_dichotomy_step_ralgo(x.clone(), 0.0, ralgo);
+        let improved_best_2 =
+            CirclesPacking::from_coords_vec_and_radiuses(x, &inner_circles_radiuses);
+
+        improved_best_2
+    });
+
+    println!("(s) heuristic + ralgo(q1=0.95)");
+    println!("time = {total_time_ralgo_1}");
+    println!("R = {}", improved_1.main_circle.radius);
+
+    println!();
+
+    println!("(s) heuristic + ralgo(q1=1.0)");
+    println!("time = {total_time_ralgo_2}");
+    println!("R = {}", improved_2.main_circle.radius);
 }

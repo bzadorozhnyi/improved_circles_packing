@@ -155,4 +155,11 @@ impl CirclesPacking {
 
         root.present().ok();
     }
+
+    pub fn inner_circles_radiuses(&self) -> Vec<f64> {
+        self.inner_circles
+            .iter()
+            .map(|c| c.radius)
+            .collect::<Vec<_>>()
+    }
 }

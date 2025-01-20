@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use nalgebra::DVector;
 
 use crate::utils::FloatType;
@@ -6,13 +8,14 @@ use super::RAlgorithm;
 
 type CalcfgType = dyn Fn(&DVector<FloatType>) -> (FloatType, DVector<FloatType>);
 
+#[derive(Clone)]
 pub struct RAlgorithmBuilder {
     alpha: FloatType,
     q1: FloatType,
     epsx: FloatType,
     epsg: FloatType,
     max_iterations: usize,
-    calcfg: Box<CalcfgType>,
+    calcfg: Arc<CalcfgType>,
 }
 
 impl Default for RAlgorithmBuilder {
@@ -23,8 +26,8 @@ impl Default for RAlgorithmBuilder {
             epsx: 1e-6,
             epsg: 1e-7,
             max_iterations: 3_000,
-            calcfg: Box::new(|_x: &DVector<FloatType>| {
-                panic!("Daefault calcfg should be overriden before use!")
+            calcfg: Arc::new(|_x: &DVector<FloatType>| {
+                panic!("Default calcfg should be overriden before use!")
             }),
         }
     }
@@ -60,7 +63,7 @@ impl RAlgorithmBuilder {
         self
     }
 
-    pub fn calcfg(mut self, calcfg: Box<CalcfgType>) -> Self {
+    pub fn calcfg(mut self, calcfg: Arc<CalcfgType>) -> Self {
         self.calcfg = calcfg;
         self
     }
