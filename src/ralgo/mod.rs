@@ -71,7 +71,8 @@ impl RAlgorithm {
             }
 
             let r = b_matrix.tr_mul(&(&g1 - &g0)).normalize();
-            b_matrix += beta_v * (&b_matrix * &r) * &r.transpose();
+            let temp = &b_matrix * &r;
+            b_matrix.ger(beta_v, &temp, &r, 1.0);
             g0 = g1;
         }
 

@@ -39,25 +39,32 @@ pub fn calcfg(
     const EPS: FloatType = 1e-24;
 
     for i in 0..number_of_circles {
-        let mut temp =
-            cx[i].powi(2) + cy[i].powi(2) - (main_circle_radius - radiuses[i]).powi(2) + EPS;
+        let (cx_i, cy_i) = (cx[i], cy[i]);
+        let radius_diff = main_circle_radius - radiuses[i];
+
+        let mut temp = cx_i * cx_i + cy_i * cy_i - radius_diff * radius_diff + EPS;
         if temp > 0.0 {
             f += P1 * temp;
-            gx[i] += P1 * cx[i];
-            gy[i] += P1 * cy[i];
+            gx[i] += P1 * cx_i;
+            gy[i] += P1 * cy_i;
             gr -= P2;
         }
 
         for j in (i + 1)..number_of_circles {
-            temp = -(cx[i] - cx[j]).powi(2) - (cy[i] - cy[j]).powi(2)
-                + (radiuses[i] + radiuses[j]).powi(2)
-                + EPS;
+            let cx_diff = cx_i - cx[j];
+            let cy_diff = cy_i - cy[j];
+            let radius_sum = radiuses[i] + radiuses[j];
+
+            temp = -(cx_diff * cx_diff + cy_diff * cy_diff) + radius_sum * radius_sum + EPS;
             if temp > 0.0 {
                 f += P1 * temp;
-                gx[i] -= P1 * (cx[i] - cx[j]);
-                gy[i] -= P1 * (cy[i] - cy[j]);
-                gx[j] += P1 * (cx[i] - cx[j]);
-                gy[j] += P1 * (cy[i] - cy[j]);
+                let scaled_cx = P1 * cx_diff;
+                let scaled_cy = P1 * cy_diff;
+
+                gx[i] -= scaled_cx;
+                gy[i] -= scaled_cy;
+                gx[j] += scaled_cx;
+                gy[j] += scaled_cy;
             }
         }
     }
@@ -67,7 +74,7 @@ pub fn calcfg(
             .iter()
             .min_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap();
-        
+
     if temp > 0.0 {
         f += P2 * temp;
         gr -= P2;
