@@ -34,8 +34,24 @@ impl Circle {
         }
     }
 
+    pub fn overlap_quad(&self, other: &Circle) -> bool {
+        if let (Some(center_self), Some(center_other)) = (self.center, other.center) {
+            let distance =
+                (center_self.x - center_other.x).powi(2) + (center_self.y - center_other.y).powi(2);
+            let radius_sum = (self.radius + other.radius).powi(2);
+
+            distance <= radius_sum
+        } else {
+            false
+        }
+    }
+
     pub fn is_overlap(&self, circles: &[Circle]) -> bool {
         circles.iter().any(|c| self.overlap(c))
+    }
+
+    pub fn is_overlap_quad(&self, circles: &[Circle]) -> bool {
+        circles.iter().any(|c| self.overlap_quad(c))
     }
 
     pub fn inside(&self, other: &Circle) -> bool {
@@ -54,6 +70,14 @@ impl Circle {
         if let Some(center) = self.center {
             let distance = (center.x.powi(2) + center.y.powi(2)).sqrt();
             distance <= (main_circle_radius - self.radius)
+        } else {
+            false
+        }
+    }
+
+    pub fn is_inside_main_circle_quad(&self, main_circle_radius: FloatType) -> bool {
+        if let Some(center) = self.center {
+            center.x.powi(2) + center.y.powi(2) <= (main_circle_radius - self.radius).powi(2)
         } else {
             false
         }

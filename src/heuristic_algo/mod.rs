@@ -26,8 +26,9 @@ impl HeuristicAlgorithm {
             }
         }
 
-        let mut main_circle_radius: FloatType =
-            (self.radiuses.iter().sum::<FloatType>() as FloatType).ceil();
+        let radiuses_sum = (self.radiuses.iter().sum::<FloatType>() as FloatType).ceil();
+
+        let mut main_circle_radius: FloatType = radiuses_sum;
 
         let mut new_innner_circles_pack: Vec<Circle> = Vec::new();
         let mut inner_circles_pack: Vec<Circle> = (0..self.radiuses.len())
@@ -42,7 +43,9 @@ impl HeuristicAlgorithm {
             let (mut left, mut right) = (0 as FloatType, main_circle_radius);
 
             while right - left >= 1e-4 {
-                let middle = (left + right) / 2.0;
+                // let middle = (left + right) / 2.0;
+                let middle = left + (right - left) / 1.02;
+                // let middle = right - (right - left) / 500.0;
 
                 if let Some(circles) = self.pack_circles(middle) {
                     right = middle;
@@ -123,7 +126,7 @@ impl HeuristicAlgorithm {
                 radius: circles[index].radius,
             };
 
-            if !new_circle.is_overlap(circles) {
+            if !new_circle.is_overlap_quad(circles) {
                 circles[index] = new_circle;
                 placed_circle_indexes.push(index);
 
@@ -214,8 +217,8 @@ impl HeuristicAlgorithm {
                             center: Some(point),
                         };
 
-                        if new_circle.is_inside_main_circle(main_circle_radius)
-                            && !new_circle.is_overlap(circles)
+                        if new_circle.is_inside_main_circle_quad(main_circle_radius)
+                            && !new_circle.is_overlap_quad(circles)
                         {
                             circles[i] = new_circle;
                             break 'circles_loop;
@@ -326,8 +329,8 @@ impl HeuristicAlgorithm {
                             radius: circles[i].radius,
                         };
 
-                        if new_circle.is_inside_main_circle(main_circle_radius)
-                            && !new_circle.is_overlap(circles)
+                        if new_circle.is_inside_main_circle_quad(main_circle_radius)
+                            && !new_circle.is_overlap_quad(circles)
                         {
                             circles[i] = new_circle;
                             new_placed_circle_indexes.push(i);
