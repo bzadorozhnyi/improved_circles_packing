@@ -54,6 +54,18 @@ impl Circle {
         circles.iter().any(|c| self.overlap_quad(c))
     }
 
+    pub fn distance(&self, other: &Circle) -> FloatType {
+        if let (Some(center_self), Some(center_other)) = (self.center, other.center) {
+            let distance = ((center_self.x - center_other.x).powi(2)
+                + (center_self.y - center_other.y).powi(2))
+            .sqrt();
+
+            distance
+        } else {
+            FloatType::INFINITY
+        }
+    }
+
     pub fn inside(&self, other: &Circle) -> bool {
         if let (Some(center_self), Some(center_other)) = (self.center, other.center) {
             let distance = ((center_self.x - center_other.x).powi(2)

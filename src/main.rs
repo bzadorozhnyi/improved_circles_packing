@@ -47,10 +47,6 @@ fn main() {
 
         let answers: Vec<_> = par_iter.collect();
 
-        // for answer in &answers {
-        //     println!("{}", answer.main_circle.radius);
-        // }
-
         let best = answers
             .into_iter()
             .filter(|a| a.is_valid_pack())
@@ -70,6 +66,7 @@ fn main() {
     println!("heuristic");
     println!("time = {total_time}");
     println!("R = {}", best.main_circle.radius);
+    best.plot("images/heuristic.png");
 
     println!();
 
@@ -109,12 +106,14 @@ fn main() {
     println!("heuristic + ralgo(q1=0.95)");
     println!("time = {total_time_ralgo_1}");
     println!("R = {}", improved_1.main_circle.radius);
+    improved_1.plot("images/heuristic + ralgo(q1=0.95).png");
 
     println!();
 
     println!("heuristic + ralgo(q1=1.0)");
     println!("time = {total_time_ralgo_2}");
     println!("R = {}", improved_2.main_circle.radius);
+    improved_2.plot("images/heuristic + ralgo(q1=1).png");
 
     println!();
 
@@ -141,10 +140,12 @@ fn main() {
     println!("(s) heuristic + ralgo(q1=0.95)");
     println!("time = {total_time_ralgo_1}");
     println!("R = {}", improved_1.main_circle.radius);
+    improved_1.plot("images/heuristic + ralgo(q1=0.95) (s).png");
 
     println!();
 
     println!("(s) heuristic + ralgo(q1=1.0)");
     println!("time = {total_time_ralgo_2}");
     println!("R = {}", improved_2.main_circle.radius);
+    improved_2.plot("images/heuristic + ralgo(q1=1) (s).png");
 }

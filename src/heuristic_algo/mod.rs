@@ -304,7 +304,9 @@ impl HeuristicAlgorithm {
             let mut new_placed_circle_indexes: Vec<usize> = Vec::new();
 
             for placed_circle_index in 0..placed_circle_indexes.len() {
-                'circles_loop: for i in 0..circles.len() {
+                let (mut candidate_k, mut candidate_circle_index, mut candidate_circle) =
+                    (FloatType::INFINITY, 0, Circle::default());
+                for i in 0..circles.len() {
                     if circles[i].center.is_some() {
                         continue;
                     }
@@ -313,6 +315,13 @@ impl HeuristicAlgorithm {
                         let first_index = cycle_index(&placed_circle_indexes, placed_circle_index);
                         let second_index =
                             cycle_index(&placed_circle_indexes, placed_circle_index + shift);
+
+                        let dist12 = circles[first_index].distance(&circles[second_index]);
+                        let k = (1.0 - dist12 / circles[i].radius).abs();
+
+                        if k > candidate_k {
+                            continue;
+                        }
 
                         let new_circle_center: Option<Point> = self.find_third_circle_center(
                             &circles[first_index],
@@ -331,12 +340,17 @@ impl HeuristicAlgorithm {
 
                         if new_circle.is_inside_main_circle_quad(main_circle_radius)
                             && !new_circle.is_overlap_quad(circles)
+                            && candidate_k > k
                         {
-                            circles[i] = new_circle;
-                            new_placed_circle_indexes.push(i);
-                            break 'circles_loop;
+                            (candidate_k, candidate_circle_index, candidate_circle) =
+                                (k, i, new_circle);
                         }
                     }
+                }
+
+                if candidate_k != FloatType::INFINITY {
+                    circles[candidate_circle_index] = candidate_circle;
+                    new_placed_circle_indexes.push(candidate_circle_index);
                 }
             }
             placed_circle_indexes = new_placed_circle_indexes;
