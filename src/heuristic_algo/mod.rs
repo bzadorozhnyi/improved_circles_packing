@@ -291,6 +291,14 @@ impl HeuristicAlgorithm {
         }
     }
 
+    fn eval_alpha(&self, c1: &Circle, c2: &Circle, r3: FloatType) -> FloatType {
+        let a = c1.radius + r3 + self.delta;
+        let b = c2.radius + r3 + self.delta;
+        let c = c1.distance(c2) + self.delta;
+
+        (a * a + b * b - c * c) / (2.0 * a * b)
+    }
+
     fn pack_other_layers(
         &self,
         circles: &mut [Circle],
@@ -304,22 +312,25 @@ impl HeuristicAlgorithm {
             let mut new_placed_circle_indexes: Vec<usize> = Vec::new();
 
             for placed_circle_index in 0..placed_circle_indexes.len() {
-                let (mut candidate_k, mut candidate_circle_index, mut candidate_circle) =
-                    (FloatType::INFINITY, 0, Circle::default());
+                let (mut candidate_alpha, mut candidate_circle_index, mut candidate_circle) =
+                    (FloatType::NEG_INFINITY, 0, Circle::default());
                 for i in 0..circles.len() {
                     if circles[i].center.is_some() {
                         continue;
                     }
 
                     for shift in 1..=2.min(placed_circle_indexes.len()) {
-                        let first_index = cycle_index(&placed_circle_indexes, placed_circle_index);
+                        let first_index = placed_circle_indexes[placed_circle_index];
                         let second_index =
                             cycle_index(&placed_circle_indexes, placed_circle_index + shift);
 
-                        let dist12 = circles[first_index].distance(&circles[second_index]);
-                        let k = (1.0 - dist12 / circles[i].radius).abs();
+                        let alpha = self.eval_alpha(
+                            &circles[first_index],
+                            &circles[second_index],
+                            circles[i].radius,
+                        );
 
-                        if k > candidate_k {
+                        if alpha < candidate_alpha {
                             continue;
                         }
 
@@ -340,15 +351,15 @@ impl HeuristicAlgorithm {
 
                         if new_circle.is_inside_main_circle_quad(main_circle_radius)
                             && !new_circle.is_overlap_quad(circles)
-                            && candidate_k > k
+                            && alpha > candidate_alpha
                         {
-                            (candidate_k, candidate_circle_index, candidate_circle) =
-                                (k, i, new_circle);
+                            (candidate_alpha, candidate_circle_index, candidate_circle) =
+                                (alpha, i, new_circle);
                         }
                     }
                 }
 
-                if candidate_k != FloatType::INFINITY {
+                if candidate_alpha != FloatType::NEG_INFINITY {
                     circles[candidate_circle_index] = candidate_circle;
                     new_placed_circle_indexes.push(candidate_circle_index);
                 }
