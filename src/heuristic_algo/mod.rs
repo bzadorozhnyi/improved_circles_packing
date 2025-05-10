@@ -330,7 +330,7 @@ impl HeuristicAlgorithm {
                             circles[i].radius,
                         );
 
-                        if alpha < candidate_alpha {
+                        if alpha <= candidate_alpha {
                             continue;
                         }
 
@@ -351,7 +351,6 @@ impl HeuristicAlgorithm {
 
                         if new_circle.is_inside_main_circle_quad(main_circle_radius)
                             && !new_circle.is_overlap_quad(circles)
-                            && alpha > candidate_alpha
                         {
                             (candidate_alpha, candidate_circle_index, candidate_circle) =
                                 (alpha, i, new_circle);
