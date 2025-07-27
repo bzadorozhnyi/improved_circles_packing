@@ -4,7 +4,7 @@
 [![rayon](https://img.shields.io/badge/rayon-1.10.0-4B8BBE?logo=rust)](https://crates.io/crates/rayon)
 [![nalgebra](https://img.shields.io/badge/nalgebra-0.33.2-FF6F61?logo=rust)](https://crates.io/crates/nalgebra)
 
-Improved version of [heuristic packing algorithm](https://github.com/bzadorozhnyi/circles-packing) combined with dichotomy step ralgo. Check [improvements and compare section](#improvements) for details.
+Improved version of [heuristic packing algorithm](https://github.com/bzadorozhnyi/circles-packing) combined with dichotomy step ralgo. Check improvements and compare section for details.
 
 ## 📐 Condition
 
